@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Software/Python_venv/venv_1/**)",
+      "Bash(\"/d/Software/Python_venv/venv_1/Scripts/python.exe\":*)",
+      "Bash(\"/d/Software/Python_venv/venv_1/Scripts/pip.exe\":*)"
+    ]
+  }
+}
