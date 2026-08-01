@@ -1,6 +1,0 @@
-
-I am going to use D:\MyWork\Python\ClaudeCoding folder to  cretae Python projects using Claude COde.
-I want to have some settings and create common agents, skills files which would be used in future for all projects created under this folderHelp me to create those
-
-1) All Project will have menaingful Name
-2) All Projects here will use 
