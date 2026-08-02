@@ -1,6 +1,9 @@
+"""Evaluate arithmetic expression strings (+ - * / (), operator precedence)
+using a recursive-descent parser built on the `operations` functions.
+"""
 from operations import add, subtract, multiply, divide
 
-# This module provides a simple expression evaluator that can handle basic arithmetic operations: addition, subtraction, multiplication, and division. It uses a recursive-descent parser to evaluate expressions with proper operator precedence and parentheses.
+
 def _tokenize(expression: str):
     tokens = []
     i = 0
@@ -97,6 +100,18 @@ class _Parser:
 
 
 def evaluate_expression(expression: str) -> float:
+    """
+    Evaluate a math expression string.
+
+    Args:
+        expression (str): e.g. "5+3*(2-1)"
+    Returns:
+        float: the computed result
+
+    Example:
+        from expression_evaluator import evaluate_expression
+        evaluate_expression("5+3*(2-1)")  # -> 8.0
+    """
     tokens = _tokenize(expression)
     if not tokens:
         raise ValueError("Empty expression")

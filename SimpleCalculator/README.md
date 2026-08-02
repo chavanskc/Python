@@ -32,3 +32,6 @@ evaluate_expression("5+3*(2-1)")  # -> 8.0
 - 2026-08-01: initial CLI with four operations
 - 2026-08-01: added expression evaluator (`+ - * / ()`, operator precedence)
 - 2026-08-01: added README, `.vscode` venv_1 wiring
+- 2026-08-02: reverted an accidental restructure (`cli.py` moved into a `Cli/`
+  subfolder, `expression_evaluator.py` moved into `operations/`) that broke
+  the `operations` import — both are back at the project root
