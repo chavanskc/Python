@@ -1,6 +1,6 @@
 from operations import add, subtract, multiply, divide
 
-
+# This module provides a simple expression evaluator that can handle basic arithmetic operations: addition, subtraction, multiplication, and division. It uses a recursive-descent parser to evaluate expressions with proper operator precedence and parentheses.
 def _tokenize(expression: str):
     tokens = []
     i = 0
