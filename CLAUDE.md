@@ -49,7 +49,7 @@ For any new project or non-trivial feature, propose a plan and get explicit appr
 Every project has its own `README.md`, created when the project is started and updated whenever features are added or changed. Cover: purpose, folder structure, how to run it, and how to import/reuse its functions from another project.
 
 ## 8. Version control
-Every project is its own git repository, pushed to a separate GitHub repo under the user's account (not a monorepo). Commit as features land. The workspace root itself is not a git repo — only individual project folders are.
+The whole workspace (`D:\MyWork\Python\ClaudeCoding`) is one git repository, pushed to `chavanskc/Python` on GitHub, with each project as a subfolder — not a repo per project. Work happens on the `dev-1` branch. Commit as features land.
 
 ## Tooling available in this workspace
 - **Skill `new-python-project`** (`.claude/skills/new-python-project/`) — scaffolds a new project following rules 1-3, 5, 7, 8 in one step.

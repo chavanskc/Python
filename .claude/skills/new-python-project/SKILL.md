@@ -1,12 +1,7 @@
 ---
 name: new-python-project
 description: Scaffold a new Python project under D:\MyWork\Python\ClaudeCoding following workspace conventions (venv_1, reusable package layout, README, git). Use when the user asks to start/create a new Python project in this workspace.
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-  - AskUserQuestion
+user-invokable: true
 ---
 
 # /new-python-project — scaffold a new project
@@ -36,10 +31,13 @@ follow rule 6 (plan the actual feature, get approval, then code it).
        __init__.py
      main.py
      README.md
-     .gitignore
      .vscode/
        settings.json
    ```
+
+   No per-project `.gitignore` needed — the workspace-root `.gitignore`
+   already excludes `__pycache__/`, `*.pyc`, and `.claude/settings.local.json`
+   for every project.
 
    - `<package_name>/__init__.py` — empty, or a one-line module docstring
      naming the package. This is where real logic modules go later, one
@@ -78,13 +76,6 @@ follow rule 6 (plan the actual feature, get approval, then code it).
      ## Features / Changelog
      - <date>: initial scaffold
      ```
-   - `.gitignore`:
-     ```
-     __pycache__/
-     *.pyc
-     .venv/
-     .claude/settings.local.json
-     ```
    - `.vscode/settings.json` — copy the working pattern from
      `Practice/.vscode/settings.json`:
      ```json
@@ -97,18 +88,16 @@ follow rule 6 (plan the actual feature, get approval, then code it).
      }
      ```
 
-4. **Initialize git.** In the new project folder:
+4. **Commit.** The workspace root (`D:\MyWork\Python\ClaudeCoding`) is
+   already the `chavanskc/Python` git repo (branch `dev-1`) — don't `git
+   init` inside the new project folder. From the workspace root:
    ```
-   git init
-   git add .
-   git commit -m "Initial scaffold for <ProjectFolder>"
+   git add <ProjectFolder>
+   git commit -m "Scaffold <ProjectFolder>"
    ```
+   Ask the user before pushing (`git push`) — don't push automatically.
 
 5. **Report next steps to the user:**
-   - The scaffold and first commit are done locally.
-   - Per workspace convention, this project should get its own GitHub repo
-     (not a monorepo). Once `gh auth login` is confirmed working, run:
-     `gh repo create <ProjectFolder> --source=. --remote=origin --push`
-     (ask public vs private first, and confirm before pushing).
+   - The scaffold and commit are done.
    - Per CLAUDE.md rule 6: now stop and plan the actual feature/logic with
      the user before writing any code into the package.

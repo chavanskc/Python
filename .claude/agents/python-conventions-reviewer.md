@@ -40,9 +40,11 @@ differ) and evaluate:
    example)? You can't know if it's "current" with certainty — flag it if it
    describes something that doesn't exist in the code, or if the code has
    an obvious feature/module the README never mentions.
-7. **Git / GitHub** — is the project folder its own git repo (`git status`
-   works, has commits)? Does `git remote -v` show an `origin`? Flag a
-   project with uncommitted work sitting around, or no remote at all.
+7. **Git / GitHub** — the project folder is *not* its own repo; it's a
+   subfolder of the single `chavanskc/Python` workspace repo (branch
+   `dev-1`). Run `git status`/`git log -- <project>` from the workspace
+   root. Flag uncommitted or unpushed work for the project's files, not a
+   missing per-project `.git`/remote — that's expected.
 
 ## Report
 
