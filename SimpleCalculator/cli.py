@@ -1,5 +1,4 @@
-from operations import add, subtract, multiply, divide
-from expression_evaluator import evaluate_expression
+from math_lib import add, subtract, multiply, divide, evaluate_expression
 
 MENU = """
 1) Add

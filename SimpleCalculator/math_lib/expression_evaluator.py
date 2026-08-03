@@ -1,7 +1,7 @@
 """Evaluate arithmetic expression strings (+ - * / (), operator precedence)
 using a recursive-descent parser built on the `operations` functions.
 """
-from operations import add, subtract, multiply, divide
+from .operations import add, subtract, multiply, divide
 
 
 def _tokenize(expression: str):

@@ -16,7 +16,7 @@ Structure each project so its logic can be imported by other projects, not just 
 - `<project_name>/` — an importable package (snake_case, has `__init__.py`), with small, single-responsibility modules grouped by what they do.
 - `main.py` (or `cli.py`) — a thin entry point at the project root that only wires the package together (parses args, calls functions, prints results). No real logic here.
 
-Example already in this workspace: `SimpleCalculator/operations/` holds one module per operation (`addition.py`, `subtraction.py`, ...), and `SimpleCalculator/cli.py` / `expression_evaluator.py` just call into it.
+Example already in this workspace: `SimpleCalculator/math_lib/` is the library package (with an `operations/` subpackage, one module per operation), and `SimpleCalculator/cli.py` at the project root just calls into it.
 
 ## 4. Simplicity
 Write simple, readable code a developer can walk through without effort. PEP8 style. No speculative abstractions, no features beyond what's asked, no half-finished code paths.
