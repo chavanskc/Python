@@ -6,7 +6,8 @@ with sensible local defaults.
 import os
 from pathlib import Path
 
-SOURCE_DOCS_DIR = Path(os.environ.get("DOC_SEARCH_SOURCE_DIR", ""))
+_source_dir_env = os.environ.get("DOC_SEARCH_SOURCE_DIR")
+SOURCE_DOCS_DIR = Path(_source_dir_env) if _source_dir_env else None
 INDEX_DIR = Path(os.environ.get("DOC_SEARCH_INDEX_DIR", str(Path(__file__).resolve().parent.parent / "index_store")))
 
 TEXT_EXTENSIONS = {".txt", ".md", ".csv"}

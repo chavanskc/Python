@@ -186,6 +186,25 @@ flowchart TD
   certificates, bank statements, W2s) and must never be committed.
 - Source documents themselves are never copied into the repo.
 
+**Where to put your documents:** anywhere on disk — the folder can stay
+exactly where it already is. Ingestion is read-only (`file_scanner.scan_files`
+walks it, the extractors read each file); nothing is ever moved, copied, or
+modified. The one hard rule: keep it **outside** `DocSearchChatbot/`, since
+that folder is inside the git repo and personal documents must never end up
+git-tracked.
+
+**Setting `SOURCE_DOCS_DIR`:**
+- Environment variable, before launching (PowerShell):
+  `$env:DOC_SEARCH_SOURCE_DIR = "C:\path\to\your\documents"` — lasts for
+  that terminal session only. Set it as a permanent Windows user environment
+  variable (System Properties → Environment Variables) to avoid repeating this.
+- **At runtime, no restart needed:** `cli.py` prompts for the folder
+  interactively on startup if the environment variable isn't set (or points
+  somewhere that doesn't exist), and menu option "Change documents folder"
+  lets you switch to a different folder mid-session — useful for pointing
+  at more than one document collection without restarting or touching
+  environment variables at all.
+
 ## 9. Non-functional notes
 
 - **Incremental reindexing:** a file is only re-extracted/re-indexed if its

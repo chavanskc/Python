@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from doc_search_chatbot import config
 from doc_search_chatbot.indexing.index_builder import reindex
 from doc_search_chatbot.query.query_service import answer_query
@@ -5,37 +7,60 @@ from doc_search_chatbot.query.query_service import answer_query
 MENU = """
 1) Reindex documents
 2) Ask a question
-3) Quit
+3) Change documents folder
+4) Quit
 """
 
 
 def main():
-    if not config.SOURCE_DOCS_DIR or not config.SOURCE_DOCS_DIR.exists():
-        print("Set the DOC_SEARCH_SOURCE_DIR environment variable to your documents folder, then rerun.")
-        return
+    """Run the interactive reindex/ask/change-folder/quit menu loop."""
+    source_dir = _resolve_source_dir()
 
     while True:
+        print(f"\nDocuments folder: {source_dir}")
         print(MENU)
-        choice = input("Choose an option (1-3): ").strip()
+        choice = input("Choose an option (1-4): ").strip()
 
-        if choice == "3":
+        if choice == "4":
             print("Goodbye!")
             break
 
         if choice == "1":
-            _run_reindex()
+            _run_reindex(source_dir)
         elif choice == "2":
             _run_query()
+        elif choice == "3":
+            source_dir = _prompt_for_source_dir()
         else:
-            print("Invalid option. Please choose 1-3.")
+            print("Invalid option. Please choose 1-4.")
 
 
-def _run_reindex():
-    counts = reindex(config.SOURCE_DOCS_DIR, config.INDEX_DIR)
+def _resolve_source_dir() -> Path:
+    """Use DOC_SEARCH_SOURCE_DIR if it's set and valid, else prompt for a folder."""
+    if config.SOURCE_DOCS_DIR and config.SOURCE_DOCS_DIR.exists():
+        return config.SOURCE_DOCS_DIR
+    print("No documents folder configured (set DOC_SEARCH_SOURCE_DIR to skip this prompt next time).")
+    return _prompt_for_source_dir()
+
+
+def _prompt_for_source_dir() -> Path:
+    """Repeatedly ask for a folder path until an existing directory is given."""
+    while True:
+        raw_path = input("Enter the full path to your documents folder: ").strip().strip('"')
+        path = Path(raw_path)
+        if path.is_dir():
+            return path
+        print("That folder doesn't exist. Try again.")
+
+
+def _run_reindex(source_dir: Path):
+    """Reindex source_dir and print the resulting indexed/skipped/errored counts."""
+    counts = reindex(source_dir, config.INDEX_DIR)
     print(f"Indexed: {counts['indexed']}, skipped (unchanged): {counts['skipped']}, errored: {counts['errored']}")
 
 
 def _run_query():
+    """Prompt for a question and print the LLM answer (if any) and matching files."""
     query_text = input("Ask a question: ").strip()
     if not query_text:
         return

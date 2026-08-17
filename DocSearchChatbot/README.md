@@ -49,10 +49,16 @@ Prerequisites (one-time):
 
 Then, from this folder:
 ```
-set DOC_SEARCH_SOURCE_DIR=C:\path\to\your\documents
 D:\Software\Python_venv\venv_1\Scripts\python.exe cli.py
 ```
-Choose `1` to build/update the index, then `2` to ask a question.
+If `DOC_SEARCH_SOURCE_DIR` isn't set, the CLI prompts for your documents
+folder on startup (any folder on disk — nothing is copied or moved, just
+read). To skip the prompt, set it beforehand:
+```
+set DOC_SEARCH_SOURCE_DIR=C:\path\to\your\documents
+```
+Choose `1` to build/update the index, `2` to ask a question, or `3` to
+switch to a different documents folder without restarting.
 
 ## How to import & reuse
 ```python
@@ -70,3 +76,6 @@ result.results    # ranked [SearchResult(path, filename, snippet, ...)]
 - 2026-08-16: Phase 1 scaffold and design (ingestion for text/PDF/image
   documents with OCR fallback, Whoosh full-text search with fuzzy-filename
   fallback, local Ollama-backed answer generation, CLI)
+- 2026-08-16: CLI prompts for the documents folder at startup when
+  `DOC_SEARCH_SOURCE_DIR` isn't set, and gained a "change documents folder"
+  menu option to switch at runtime without restarting
