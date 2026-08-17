@@ -53,48 +53,116 @@ Four components, wired together only by `cli.py`:
   CLI.
 
 `cli.py` is the only place that prints or reads input; it calls
-`index_builder` (to reindex) and `query_service` (to search).
+`index_builder` (to reindex) and `query_service` (to search). See the block
+diagram below for the same picture with exact file/function references.
 
-## 4. Ingestion & indexing flow
+## 4. Block diagram — components & code references
+
+Static component view (no branching/decisions — just what depends on what).
+Every box names the actual file and the function/class you'd open to see
+that piece of behavior.
+
+```mermaid
+flowchart LR
+    CLI["cli.py<br/>main() / _run_reindex() / _run_query()"]
+
+    subgraph ING["ingestion/"]
+        direction TB
+        FS["file_scanner.py<br/>scan_files()"]
+        TE["text_extractor.py<br/>extract_text()"]
+        PE["pdf_extractor.py<br/>extract_text_from_pdf()"]
+        PR["pdf_rasterizer.py<br/>rasterize_pdf_pages()"]
+        OCR["image_ocr.py<br/>ocr_image() / extract_text_from_image()"]
+        DOC["document.py<br/>Document"]
+    end
+
+    subgraph IDX["indexing/"]
+        direction TB
+        IB["index_builder.py<br/>reindex() / open_or_create_index()"]
+        SCH["index_schema.py<br/>build_schema()"]
+        SR["search.py<br/>search() / SearchResult"]
+    end
+
+    subgraph LLMBOX["llm/"]
+        direction TB
+        BASE["base.py<br/>LLMClient"]
+        OLL["ollama_client.py<br/>OllamaClient.generate()"]
+    end
+
+    subgraph QRY["query/"]
+        QS["query_service.py<br/>answer_query() / QueryResult"]
+    end
+
+    CFG["config.py<br/>SOURCE_DOCS_DIR, INDEX_DIR,<br/>OLLAMA_HOST, OLLAMA_MODEL"]
+    STORE[("index_store/<br/>on-disk Whoosh index")]
+    SERVER[("Ollama server<br/>localhost:11434")]
+
+    CLI -->|"1) Reindex"| IB
+    IB --> FS
+    FS -->|".txt/.md/.csv"| TE
+    FS -->|".pdf"| PE
+    PE --> PR --> OCR
+    FS -->|"image"| OCR
+    TE --> DOC
+    PE --> DOC
+    OCR --> DOC
+    DOC --> IB
+    IB --> SCH
+    IB --> STORE
+
+    CLI -->|"2) Ask"| QS
+    QS --> SR
+    SR --> STORE
+    QS --> OLL
+    OLL -.->|"implements"| BASE
+    OLL --> SERVER
+
+    CFG -.-> FS
+    CFG -.-> IB
+    CFG -.-> OLL
+```
+
+## 5. Ingestion & indexing flow
 
 ```mermaid
 flowchart TD
-    A[Source folder] --> B[file_scanner: walk & classify by extension]
+    A[Source folder] --> B["file_scanner.scan_files()"]
     B --> C{Already indexed<br/>and unchanged?<br/>mtime match}
     C -- yes --> Z[Skip]
     C -- no --> D{File type}
-    D -- .txt/.md/.csv --> E[text_extractor]
-    D -- .pdf --> F[pdf_extractor: try text layer]
+    D -- .txt/.md/.csv --> E["text_extractor.extract_text()"]
+    D -- .pdf --> F["pdf_extractor.extract_text_from_pdf()"]
     F --> G{Text layer<br/>found?}
-    G -- yes --> H[Document with extracted text]
-    G -- no, scanned PDF --> I[pdf_rasterizer: render pages to images]
-    I --> J[image_ocr: Tesseract OCR]
-    D -- image/photo --> J
+    G -- yes --> H["document.Document"]
+    G -- no, scanned PDF --> I["pdf_rasterizer.rasterize_pdf_pages()"]
+    I --> J["image_ocr.ocr_image()"]
+    D -- image/photo --> J2["image_ocr.extract_text_from_image()"]
     J --> H
+    J2 --> H
     E --> H
-    H --> K[index_builder: add/update in index]
+    H --> K["index_builder._index_one_file()<br/>(writer.update_document)"]
     K --> L[(On-disk search index<br/>index_store/)]
 ```
 
-## 5. Query flow
+## 6. Query flow
 
 ```mermaid
 flowchart TD
-    U[User types a query in cli.py] --> Q[query_service.answer_query]
-    Q --> S[indexing.search: BM25 query]
-    S --> R[rapidfuzz: optional filename fuzzy boost]
-    R --> RES[Ranked results: path, snippet, full text, score]
+    U["User types a query in cli.py: _run_query()"] --> Q["query_service.answer_query()"]
+    Q --> S["search.search()<br/>(BM25 via Whoosh)"]
+    S --> R["search._fuzzy_filename_fallback()<br/>(only if zero BM25 hits)"]
+    R --> RES["list[SearchResult]:<br/>path, snippet, full text, score"]
     RES --> AV{Ollama<br/>reachable?}
-    AV -- yes --> LLM[OllamaClient.generate:<br/>query + top result's full text -> answer]
-    LLM --> QR[QueryResult: answer + ranked results]
-    AV -- no --> QR2[QueryResult: answer=None,<br/>ranked results only]
-    QR --> CLI[cli.py prints answer, then source file paths]
+    AV -- yes --> LLM["OllamaClient.generate()<br/>via query_service._build_prompt()"]
+    LLM --> QR["QueryResult(answer, results)"]
+    AV -- no, exception caught in<br/>query_service._try_generate_answer() --> QR2["QueryResult(answer=None, results)"]
+    QR --> CLI["cli.py: _run_query() prints<br/>answer, then source file paths"]
     QR2 --> CLI
 
     CLI -.-> P2[["Phase 2 (not built):<br/>Anthropic API client<br/>+ view/copy actions"]]
 ```
 
-## 6. Data model
+## 7. Data model
 
 | `Document` (ingestion) | Whoosh schema field (indexing) |
 |---|---|
@@ -104,7 +172,7 @@ flowchart TD
 | `text: str` | `content` (indexed AND stored, so the full text can be handed to the LLM, not just a snippet) |
 | `mtime: float` | `modified_time` (stored, used for incremental skip) |
 
-## 7. Config & privacy
+## 8. Config & privacy
 
 - `SOURCE_DOCS_DIR` (the user's real document folder) and `INDEX_DIR`
   (where the on-disk index lives) are set in `config.py`, both configurable
@@ -118,7 +186,7 @@ flowchart TD
   certificates, bank statements, W2s) and must never be committed.
 - Source documents themselves are never copied into the repo.
 
-## 8. Non-functional notes
+## 9. Non-functional notes
 
 - **Incremental reindexing:** a file is only re-extracted/re-indexed if its
   `mtime` differs from what's stored in the index.
@@ -127,7 +195,7 @@ flowchart TD
 - **Logging:** basic logging (file processed, OCR fallback triggered, file
   skipped/errored) to stdout.
 
-## 9. Out of scope for Phase 1
+## 10. Out of scope for Phase 1
 
 - Anthropic API as an LLM backend (the interface supports it; only the
   concrete client is deferred to Phase 2).
@@ -135,7 +203,7 @@ flowchart TD
 - Any GUI.
 - File view / copy-to-folder actions.
 
-## 10. Appendix — library choices & cost
+## 11. Appendix — library choices & cost
 
 | Concern | Library | Install | Cost |
 |---|---|---|---|
