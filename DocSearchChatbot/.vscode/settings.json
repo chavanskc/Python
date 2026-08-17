@@ -1,0 +1,7 @@
+{
+    "code-runner.runInTerminal": true,
+    "python.defaultInterpreterPath": "D:\\Software\\Python_venv\\venv_1\\Scripts\\python.exe",
+    "code-runner.executorMap": {
+        "python": "D:\\Software\\Python_venv\\venv_1\\Scripts\\python.exe -u"
+    }
+}

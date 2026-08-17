@@ -1,0 +1,7 @@
+pypdf
+PyMuPDF
+Pillow
+pytesseract
+rapidfuzz
+whoosh
+ollama
