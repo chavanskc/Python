@@ -48,7 +48,7 @@ def add_assistant_message(messages, text):
     return messages
 
 
-def chat(messages, system=None, model=MODEL, max_tokens=MAX_TOKENS):
+def chat(messages, system=None, model=MODEL, max_tokens=MAX_TOKENS, temperature=0.0):
     params = {"model": model, "max_tokens": max_tokens, "messages": messages}
     if system:
         params["system"] = system
